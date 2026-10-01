@@ -98,18 +98,18 @@ use tokio_util::sync::CancellationToken;
 use tray::*;
 use zip::ZipArchive;
 
-const RELEASE_PAGE_URL: &str = "https://github.com/router-for-me/CLIProxyAPI/releases/latest";
-const RELEASE_ATOM_URL: &str = "https://github.com/router-for-me/CLIProxyAPI/releases.atom";
+const RELEASE_PAGE_URL: &str = "https://github.com/masoodhumza60/CLIProxyAPIPlus/releases/latest";
+const RELEASE_ATOM_URL: &str = "https://github.com/masoodhumza60/CLIProxyAPIPlus/releases.atom";
 const RELEASE_DOWNLOAD_PREFIX: &str =
-    "https://github.com/router-for-me/CLIProxyAPI/releases/download/";
+    "https://github.com/masoodhumza60/CLIProxyAPIPlus/releases/download/";
 #[cfg(windows)]
-const APP_UPDATE_MANIFEST_URL: &str = "https://github.com/router-for-me/EasyCLIProxyAPI/releases/latest/download/portable-update-windows.json";
+const APP_UPDATE_MANIFEST_URL: &str = "https://github.com/masoodhumza60/CLIProxyAPIPlus/releases/latest/download/portable-update-windows.json";
 #[cfg(target_os = "linux")]
-const APP_UPDATE_MANIFEST_URL: &str = "https://github.com/router-for-me/EasyCLIProxyAPI/releases/latest/download/portable-update-linux.json";
+const APP_UPDATE_MANIFEST_URL: &str = "https://github.com/masoodhumza60/CLIProxyAPIPlus/releases/latest/download/portable-update-linux.json";
 #[cfg(target_os = "macos")]
-const APP_UPDATE_MANIFEST_URL: &str = "https://github.com/router-for-me/EasyCLIProxyAPI/releases/latest/download/portable-update-darwin-v2.json";
+const APP_UPDATE_MANIFEST_URL: &str = "https://github.com/masoodhumza60/CLIProxyAPIPlus/releases/latest/download/portable-update-darwin-v2.json";
 const APP_RELEASE_DOWNLOAD_PREFIX: &str =
-    "https://github.com/router-for-me/EasyCLIProxyAPI/releases/download/";
+    "https://github.com/masoodhumza60/CLIProxyAPIPlus/releases/download/";
 #[cfg(windows)]
 const APP_UPDATE_MANIFEST_NAME: &str = "portable-update-windows.json";
 #[cfg(target_os = "linux")]

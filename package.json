@@ -1,8 +1,8 @@
 {
-  "name": "cpa-gui",
+  "name": "cpa-gui-plus",
   "private": true,
   "type": "module",
-  "packageManager": "bun@1.3.14",
+  "packageManager": "npm@12.0.2",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc && vite build",
