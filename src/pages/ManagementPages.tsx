@@ -29,6 +29,7 @@ import {
   shouldShowOAuthLoginStatus,
 } from '../services/oauthLoginState';
 import { AuthFileManagementPage } from './AuthFileManagementPage';
+import { QoderCliCard } from '../components/QoderCliCard';
 import { QuotaPage } from './QuotaPage';
 import { validateDevinCallback } from '../services/devinOAuth';
 import { handleHorizontalTabKey } from '../components/tabKeyboardNavigation';
@@ -603,6 +604,7 @@ export function OAuthLoginPage() {
             </section>
           );
         })}
+        <QoderCliCard />
       </div>
     </section>
   );

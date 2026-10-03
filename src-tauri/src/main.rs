@@ -38,6 +38,7 @@ use management_api::{
     management_http_client, read_management_text, read_management_value,
 };
 use oauth_browser::*;
+use qoder_cli::{qoder_cli_install, qoder_cli_login, qoder_cli_status};
 #[cfg(test)]
 use provider_health::{
     provider_health_content_type_is_streaming, provider_health_stream_has_terminal_success,
