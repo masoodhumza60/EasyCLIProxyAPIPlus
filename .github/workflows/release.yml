@@ -221,27 +221,38 @@ jobs:
           }
           trap cleanup EXIT
 
-          (umask 077; printf '%s' "$APPLE_CERTIFICATE" | base64 -D > "$certificate_path")
-          security create-keychain -p "$keychain_password" "$keychain_path"
-          if [ "${#existing_keychains[@]}" -gt 0 ]; then
-            security list-keychains -d user -s "$keychain_path" "${existing_keychains[@]}"
+          # Signing needs a certificate and an identity. A fork has neither, so
+          # this block is skipped rather than attempted: importing an empty
+          # certificate fails the whole job and takes the release with it.
+          signed=false
+          if [ -n "$APPLE_CERTIFICATE" ] && [ -n "$APPLE_SIGNING_IDENTITY" ]; then
+            signed=true
+            (umask 077; printf '%s' "$APPLE_CERTIFICATE" | base64 -D > "$certificate_path")
+            security create-keychain -p "$keychain_password" "$keychain_path"
+            if [ "${#existing_keychains[@]}" -gt 0 ]; then
+              security list-keychains -d user -s "$keychain_path" "${existing_keychains[@]}"
+            else
+              security list-keychains -d user -s "$keychain_path"
+            fi
+            security set-keychain-settings -lut 21600 "$keychain_path"
+            security unlock-keychain -p "$keychain_password" "$keychain_path"
+            security import "$certificate_path" -k "$keychain_path" -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+            security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$keychain_password" "$keychain_path"
           else
-            security list-keychains -d user -s "$keychain_path"
+            echo "No Apple signing identity configured; building unsigned."
           fi
-          security set-keychain-settings -lut 21600 "$keychain_path"
-          security unlock-keychain -p "$keychain_password" "$keychain_path"
-          security import "$certificate_path" -k "$keychain_path" -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$keychain_password" "$keychain_path"
 
           core_archive="$(find cpa-core -maxdepth 1 -type f -name 'CLIProxyAPI_*_darwin_${{ matrix.arch }}.tar.gz' -print -quit)"
-          cp "$core_archive" "$unsigned_core_archive"
-          mkdir -p "$signed_core_dir"
-          tar -xzf "$core_archive" -C "$signed_core_dir"
-          core_binary="$(find "$signed_core_dir" -type f -name 'cli-proxy-api' -print -quit)"
-          codesign --force --options runtime --timestamp --sign "$APPLE_SIGNING_IDENTITY" --keychain "$keychain_path" "$core_binary"
-          signed_archive="$RUNNER_TEMP/$(basename "$core_archive")"
-          COPYFILE_DISABLE=1 tar -czf "$signed_archive" -C "$signed_core_dir" .
-          mv "$signed_archive" "$core_archive"
+          if [ "$signed" = true ]; then
+            cp "$core_archive" "$unsigned_core_archive"
+            mkdir -p "$signed_core_dir"
+            tar -xzf "$core_archive" -C "$signed_core_dir"
+            core_binary="$(find "$signed_core_dir" -type f -name 'cli-proxy-api' -print -quit)"
+            codesign --force --options runtime --timestamp --sign "$APPLE_SIGNING_IDENTITY" --keychain "$keychain_path" "$core_binary"
+            signed_archive="$RUNNER_TEMP/$(basename "$core_archive")"
+            COPYFILE_DISABLE=1 tar -czf "$signed_archive" -C "$signed_core_dir" .
+            mv "$signed_archive" "$core_archive"
+          fi
 
           cp "release/${{ steps.package.outputs.stem }}/portable-app.json" portable-app.json
 
@@ -267,13 +278,17 @@ jobs:
             -format UDZO \
             -ov \
             "$output_dmg"
-          codesign --force --timestamp --sign "$APPLE_SIGNING_IDENTITY" --keychain "$keychain_path" "$output_dmg"
-          xcrun notarytool submit "$output_dmg" \
-            --apple-id "$APPLE_ID" \
-            --password "$APPLE_PASSWORD" \
-            --team-id "$APPLE_TEAM_ID" \
-            --wait
-          xcrun stapler staple "$output_dmg"
+          if [ "$signed" = true ]; then
+            codesign --force --timestamp --sign "$APPLE_SIGNING_IDENTITY" --keychain "$keychain_path" "$output_dmg"
+            xcrun notarytool submit "$output_dmg" \
+              --apple-id "$APPLE_ID" \
+              --password "$APPLE_PASSWORD" \
+              --team-id "$APPLE_TEAM_ID" \
+              --wait
+            xcrun stapler staple "$output_dmg"
+          else
+            echo "Skipping DMG signing and notarization; the image is unsigned."
+          fi
       - name: Archive Linux release
         if: env.PACKAGE_RELEASE == 'true' && matrix.os == 'linux'
         run: tar -czf "${{ steps.package.outputs.stem }}.tar.gz" -C release "${{ steps.package.outputs.stem }}"
