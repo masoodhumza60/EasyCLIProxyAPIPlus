@@ -1,5 +1,5 @@
 [package]
-name = "cpa-gui-plus"
+name = "cpa-gui"
 # Single source of truth for the desktop app version.
 version = "0.3.6"
 description = "CPA desktop management shell"
