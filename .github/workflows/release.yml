@@ -258,8 +258,15 @@ jobs:
 
           # Build the notarized app with Tauri, then create the DMG with hdiutil.
           # Tauri's generated create-dmg script is unreliable on GitHub's macOS runners.
-          env -u APPLE_CERTIFICATE -u APPLE_CERTIFICATE_PASSWORD \
-            bun tauri bundle --bundles app --ci --config src-tauri/tauri.dmg.conf.json
+          #
+          # An empty APPLE_SIGNING_IDENTITY still asks Tauri to sign, and signing
+          # with an empty identity fails. Unsetting it - rather than setting it to
+          # nothing - is what tells Tauri there is no identity to sign with.
+          bundle_env=(env -u APPLE_CERTIFICATE -u APPLE_CERTIFICATE_PASSWORD)
+          if [ "$signed" != true ]; then
+            bundle_env+=( -u APPLE_SIGNING_IDENTITY -u APPLE_ID -u APPLE_PASSWORD -u APPLE_TEAM_ID )
+          fi
+          "${bundle_env[@]}" bun tauri bundle --bundles app --ci --config src-tauri/tauri.dmg.conf.json
 
           app_path="$bundle_dir/macos/EasyCLIProxyAPI.app"
           resources_dir="$app_path/Contents/Resources"
