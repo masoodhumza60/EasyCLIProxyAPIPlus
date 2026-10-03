@@ -1494,6 +1494,15 @@ fn start_core_process_once(
         command.env_remove(variable);
     }
 
+    // Qoder is authenticated by an external CLI that keeps its own session, and
+    // the server locates that CLI by name through PATH. PATH is read once when a
+    // process starts, so if the CLI was installed after this application
+    // launched, the server would inherit the machine as it looked beforehand and
+    // never find it. Hand it the path we actually resolved.
+    if let Some(qoder_binary) = crate::qoder_cli::resolve_binary() {
+        command.env("QODER_PATH", qoder_binary);
+    }
+
     let mut child = match spawn_core_child(command) {
         Ok(child) => child,
         Err(error) => {

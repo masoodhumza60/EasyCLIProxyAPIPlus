@@ -22,6 +22,7 @@ mod native_i18n;
 mod oauth_browser;
 mod progress;
 mod provider_health;
+mod qoder_cli;
 #[cfg(any(
     target_os = "linux",
     target_os = "macos",
@@ -2696,6 +2697,9 @@ fn main() {
             management_api::get_oauth_status,
             management_api::submit_oauth_callback,
             list_oauth_browsers,
+            qoder_cli_status,
+            qoder_cli_install,
+            qoder_cli_login,
             open_oauth_url,
             open_external_url,
             get_version_source_settings,
