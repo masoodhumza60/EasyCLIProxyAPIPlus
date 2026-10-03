@@ -3,6 +3,16 @@ use super::*;
 pub(crate) const PORTABLE_UPDATE_HELPER_ACK_FILE: &str = "update-helper-started.ack";
 const PORTABLE_UPDATE_HELPER_START_TIMEOUT: Duration = Duration::from_secs(10);
 
+/// Path prefix of a release page this application will update itself from.
+///
+/// The download check further down is driven by APP_RELEASE_DOWNLOAD_PREFIX,
+/// which already names the repository this project publishes releases to. This
+/// is the matching tag path for that same repository. Both have to name the same
+/// place: the download half was repointed when this fork took over publishing
+/// and the path half was not, so every version check failed with "Untrusted
+/// application update release URL" no matter which repository held the release.
+const APP_RELEASE_TAG_PATH_PREFIX: &str = "/masoodhumza60/EasyCLIProxyAPIPlus/releases/tag/v";
+
 pub(crate) fn deserialize_release_notes<'de, D>(
     deserializer: D,
 ) -> Result<HashMap<String, String>, D::Error>
@@ -460,7 +470,7 @@ pub(crate) fn validate_portable_update_manifest(
         || release_url.fragment().is_some()
         || !release_url
             .path()
-            .starts_with("/router-for-me/EasyCLIProxyAPI/releases/tag/v")
+            .starts_with(APP_RELEASE_TAG_PATH_PREFIX)
     {
         return Err("Untrusted application update release URL".to_string());
     }
