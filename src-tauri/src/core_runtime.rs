@@ -3,6 +3,17 @@ use super::*;
 pub(crate) static CORE_OPERATION_LOCK: Mutex<()> = Mutex::new(());
 const BUNDLED_CORE_HANDLED_VERSION_FILE: &str = "cpa-gui-bundled-core-handled.txt";
 
+/// How long to wait for the kernel to start listening on its management port.
+///
+/// The kernel refreshes its model catalogue during startup, which means opening
+/// outbound connections before it binds its listener. On a slow or restricted
+/// network that regularly takes longer than a few seconds, and a deadline
+/// measured in single-digit seconds would kill a kernel that was about to come
+/// up fine. The wait still ends immediately if the process exits or the
+/// application is shutting down, so a generous deadline does not delay a real
+/// failure - it only stops a healthy startup from being cut short.
+const CORE_START_TIMEOUT: Duration = Duration::from_secs(120);
+
 pub(crate) fn lock_core_operation(
     process_state: &CoreProcessState,
 ) -> Result<std::sync::MutexGuard<'static, ()>, String> {
@@ -1382,7 +1393,11 @@ impl std::fmt::Display for CoreStartupFailure {
             Self::Spawn(error) => formatter.write_str(error),
             Self::StatusCheck(error) => write!(formatter, "Failed to check CPA kernel startup status: {error}"),
             Self::TimedOut(port) => {
-                write!(formatter, "CPA kernel startup timed out: management port {port} was not listening within 10 seconds")
+                write!(
+                    formatter,
+                    "CPA kernel startup timed out: management port {port} was not listening within {} seconds",
+                    CORE_START_TIMEOUT.as_secs()
+                )
             }
         }
     }
@@ -1580,7 +1595,7 @@ pub(crate) fn wait_for_core_management_port(
     address: SocketAddr,
     process_state: &CoreProcessState,
 ) -> Result<(), CoreStartupFailure> {
-    let deadline = Instant::now() + Duration::from_secs(10);
+    let deadline = Instant::now() + CORE_START_TIMEOUT;
     loop {
         if process_state.is_shutting_down() {
             return Err(CoreStartupFailure::ShuttingDown);
