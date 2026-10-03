@@ -31,7 +31,11 @@ const sourceDir = join(root, 'cpa-core');
 const sourceArchive = join(sourceDir, assetName);
 const checksumsPath = join(sourceDir, 'checksums.txt');
 const tag = `v${version}`;
-const releaseBase = `https://github.com/router-for-me/CLIProxyAPI/releases/download/${tag}`;
+// The core this application ships is the one this project publishes, not the
+// upstream default. Pinned here rather than left implicit so a build cannot
+// quietly bundle a different server than the one it was tested against.
+const coreRepository = process.env.CORE_REPOSITORY ?? 'masoodhumza60/CLIProxyAPIPlus';
+const releaseBase = `https://github.com/${coreRepository}/releases/download/${tag}`;
 
 const downloadReleaseFile = async (name, destination) => {
   const response = await fetch(`${releaseBase}/${name}`);
