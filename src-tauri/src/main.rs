@@ -2410,7 +2410,6 @@ fn main() {
                 .open_js_links_on_click(false)
                 .build(),
         )
-        .plugin(tauri_plugin_app::init())
         .manage(CoreDownloadState::default())
         .manage(AppUpdateState::default())
         .manage(CoreProcessState::new(gui_config.start_core_on_launch))
