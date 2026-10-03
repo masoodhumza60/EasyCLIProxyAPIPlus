@@ -26,6 +26,7 @@ import {
 import antigravityIcon from '../assets/icons/antigravity.svg';
 import claudeIcon from '../assets/icons/claude.svg';
 import codexIcon from '../assets/icons/codex.svg';
+import freebuffIcon from '../assets/icons/freebuff.svg';
 import geminiIcon from '../assets/icons/gemini.svg';
 import grokIcon from '../assets/icons/grok.svg';
 import devinIcon from '../assets/icons/devin.svg';
@@ -83,6 +84,7 @@ const providerIcons: Record<string, string> = {
   antigravity: antigravityIcon,
   claude: claudeIcon,
   codex: codexIcon,
+  freebuff: freebuffIcon,
   gemini: geminiIcon,
   kimi: kimiIcon,
   vertex: vertexIcon,
