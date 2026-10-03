@@ -13,6 +13,18 @@ const PORTABLE_UPDATE_HELPER_START_TIMEOUT: Duration = Duration::from_secs(10);
 /// application update release URL" no matter which repository held the release.
 const APP_RELEASE_TAG_PATH_PREFIX: &str = "/masoodhumza60/EasyCLIProxyAPIPlus/releases/tag/v";
 
+/// Report this application's own version.
+///
+/// The frontend used to ask tauri-plugin-app for this, which meant the version
+/// panel silently read "Detecting" for as long as the plugin was absent from the
+/// build - and the only published 2.x of that plugin is a pre-release, so adding
+/// it was not an option either. The answer is already compiled in here, so
+/// exposing it costs one command and no dependency.
+#[tauri::command]
+pub(crate) fn app_version() -> String {
+    env!("CARGO_PKG_VERSION").to_string()
+}
+
 pub(crate) fn deserialize_release_notes<'de, D>(
     deserializer: D,
 ) -> Result<HashMap<String, String>, D::Error>

@@ -2701,6 +2701,7 @@ fn main() {
             qoder_cli_status,
             qoder_cli_install,
             qoder_cli_login,
+            app_update::app_version,
             open_oauth_url,
             open_external_url,
             get_version_source_settings,

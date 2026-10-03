@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { getVersion } from '@tauri-apps/api/app';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import {
@@ -85,7 +84,7 @@ export function KernelPage({ view = 'home' }: { view?: KernelView }) {
 
     loadGuiSettings();
     void loadTlsSettings();
-    void getVersion()
+    void invoke<string>('app_version')
       .then((version) => {
         if (!disposed) setInstalledAppVersion(version);
       })
