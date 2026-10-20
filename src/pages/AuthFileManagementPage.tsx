@@ -12,6 +12,7 @@ import { AuthFileHealthStatus } from '../components/AuthFileHealthStatus';
 import { useDialogFocusTrap } from '../components/useDialogFocusTrap';
 import {
   Check,
+  Clock3,
   Copy,
   FileDown,
   FolderOpen,
@@ -22,8 +23,7 @@ import {
   Settings2,
   Trash2,
   X,
-} from 'lucide-react';
-import antigravityIcon from '../assets/icons/antigravity.svg';
+} from 'lucide-react';import antigravityIcon from '../assets/icons/antigravity.svg';
 import claudeIcon from '../assets/icons/claude.svg';
 import codexIcon from '../assets/icons/codex.svg';
 import freebuffIcon from '../assets/icons/freebuff.svg';
@@ -35,6 +35,7 @@ import vertexIcon from '../assets/icons/vertex.svg';
 import {
   formatDate,
   managementApi,
+  normalizeAuthIndex,
   readBoolean,
   readNumber,
   readString,
@@ -359,6 +360,22 @@ export function AuthFileManagementPage() {
     }
   };
 
+  const resetCooldown = async (file: AuthFile) => {
+    const authIndex = normalizeAuthIndex(readString(file, 'auth_index', 'authIndex'));
+    if (!authIndex) return;
+    setBusy(true);
+    setError('');
+    try {
+      await managementApi.resetCredentialCooldown(authIndex);
+      showNotice({ key: 'authFiles.cooldownReset' });
+      await loadFiles(false);
+    } catch (requestError) {
+      setError(String(requestError));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const copyName = async (name: string) => {
     try {
       await navigator.clipboard.writeText(name);
@@ -455,6 +472,9 @@ export function AuthFileManagementPage() {
                     {providerKey(file) ? <button type="button" className="secondary-button compact-button" onClick={() => setModelViewName(name)} disabled={busy} title={t('authFiles.models.viewTitle')}>{t('authFiles.models.button')}</button> : null}
                     <button type="button" className="icon-button quiet" onClick={() => void copyName(name)} disabled={busy} title={t('authFiles.copyName')} aria-label={t('authFiles.copyName')}>{copied === name ? <Check size={15} aria-hidden="true" /> : <Copy size={15} aria-hidden="true" />}</button>
                     <button type="button" className={`${disabled ? 'primary-button' : 'secondary-button'} compact-button auth-card-toggle`} onClick={() => void toggleStatus(file)} disabled={busy || !isOAuthCredentialFile(file)} title={isOAuthCredentialFile(file) ? undefined : t('authFiles.fileOnly')}>{disabled ? t('common.enable') : t('common.disable')}</button>
+                    {isOAuthCredentialFile(file) && Array.isArray(file.cooldowns) && file.cooldowns.length > 0 ? (
+                      <button type="button" className="secondary-button compact-button" onClick={() => void resetCooldown(file)} disabled={busy} title={t('authFiles.clearCooldownTitle')}><Clock3 size={14} aria-hidden="true" />{t('authFiles.clearCooldown')}</button>
+                    ) : null}
                     <button type="button" className="icon-button danger" onClick={() => void deleteFile(file)} disabled={busy || isRuntimeOnly(file)} title={t('common.delete')} aria-label={t('common.delete')}><Trash2 size={15} aria-hidden="true" /></button>
                   </footer>
                 </article>

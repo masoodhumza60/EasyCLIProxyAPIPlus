@@ -254,6 +254,10 @@ export const managementApi = {
     });
   },
   openAuthFilesDirectory: () => invoke<void>('open_auth_files_directory'),
+  resetCredentialCooldown: (authIndex: string) =>
+    request<ManagementJson>('POST', '/routing/cooldown/reset', {
+      body: { auth_index: authIndex } as ManagementJson,
+    }),
 };
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
